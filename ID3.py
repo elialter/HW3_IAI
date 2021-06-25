@@ -52,9 +52,10 @@ class ID3:
                     nom_of_low_value_patients_sick += 1
                     curr_ig = self.calc_information_gain(len(remaining_patients), i,nom_of_low_value_patients_sick,
                                                               nom_of_high_value_patients_sick)
-                if curr_ig >= best_ig:
-                    best_ig_edge = (remaining_patients[i][prop] + remaining_patients[i + 1][prop]) / 2
-                    best_prop = prop
+                    if curr_ig >= best_ig:
+                        best_ig = curr_ig
+                        best_ig_edge = (remaining_patients[i][prop] + remaining_patients[i + 1][prop]) / 2
+                        best_prop = prop
 
         high_patient = []
         low_patient = []
