@@ -21,9 +21,6 @@ if __name__ == '__main__':
         data = list(csv.reader(csvfile))
     array = numpy.array(data)
     data.sort(key=lambda x: x[3])
-    for i in data:
-        print(i)
-
 
     id3.fit_predict(array, array)
 
