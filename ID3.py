@@ -50,7 +50,7 @@ class ID3:
                 if remaining_patients[i][0] == "M":
                     nom_of_high_value_patients_sick -= 1
                     nom_of_low_value_patients_sick += 1
-                    curr_ig = self.calc_information_gain(len(remaining_patients), i,nom_of_low_value_patients_sick,
+                    curr_ig = self.calc_information_gain(len(remaining_patients), i, nom_of_low_value_patients_sick,
                                                               nom_of_high_value_patients_sick)
                     if curr_ig >= best_ig:
                         best_ig = curr_ig
@@ -116,5 +116,5 @@ class ID3:
         child_low_entropy = self.calc_and_check_entropy(probability_m_low, probability_b_low)
         child_high_entropy = self.calc_and_check_entropy(probability_m_high, probability_b_high)
         information_gain = parent_entropy - (num_of_patients_low / num_of_patients) * child_low_entropy - \
-            (num_of_patients_low / num_of_patients) * child_high_entropy
+            (num_of_patients_high / num_of_patients) * child_high_entropy
         return information_gain
