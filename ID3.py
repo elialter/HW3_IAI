@@ -8,7 +8,9 @@ IS_SICK = 0
 class TreeNode(object):
     def __init__(self) -> None:
         super().__init__()
-
+        self.sickness = None
+        self.property = None
+        self.edge_value = None
         self.high_node = None
         self.low_node = None
 
@@ -16,6 +18,7 @@ class TreeNode(object):
 
 class ID3:
     def fit_predict(self, train, test):
+
         patient_list = []
         for i in range(len(train)):
             patient_list.append(train[i].tolist())
@@ -27,11 +30,36 @@ class ID3:
             properties.append(i)
 
         root_node = self.recursiv_identefier(patient_list, properties)
+
+        correct_identification = 0
+
+        patient_list.sort()
+        test.sort()
+
+        for i in range(len(test)):
+            node = root_node
+            while node.high_node is not None or node.low_node is not None:
+                if test[i][node.property] >= node.edge_value:
+                    node = node.high_node
+                else:
+                    node = node.low_node
+            if node.sickness == patient_list[i][IS_SICK]:
+                correct_identification += 1
+            print(node.sickness, patient_list[i][IS_SICK])
+
+        print(correct_identification)
+
         print("end")
 
     def recursiv_identefier(self, remaining_patients, remaining_properties):
         if self.check_if_homogeneous(remaining_patients):
-            return TreeNode()  # TODO ? Entropy is 0
+            leaf = TreeNode()
+            if remaining_patients[0][IS_SICK] == 'M':
+                leaf.sickness = 'M'
+            else:
+                leaf.sickness = 'B'
+            return leaf
+
         if len(remaining_properties) == 0:
             return -1  # TODO
 
@@ -72,6 +100,8 @@ class ID3:
         high_properties.remove(best_prop)
 
         new_node = TreeNode()
+        new_node.property = best_prop
+        new_node.edge_value = best_ig_edge
         new_node.low_node = self.recursiv_identefier(low_patient, low_properties)
         new_node.high_node = self.recursiv_identefier(high_patient, high_properties)
 

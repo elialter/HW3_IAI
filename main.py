@@ -20,9 +20,21 @@ if __name__ == '__main__':
     with open('train.csv') as csvfile:
         data = list(csv.reader(csvfile))
     array = numpy.array(data)
+    for i in range(len(data)):
+        for j in range(1, len(data[i])):
+            data[i][j] = float(data[i][j])
+
     data.sort(key=lambda x: x[3])
 
-    id3.fit_predict(array, array)
+    test_array = []
+
+    for i in range(len(array)):
+        row = []
+        for j in range(1, len(array[0])):
+            row.append(data[i][j])
+        test_array.append(row)
+
+    id3.fit_predict(array, test_array)
 
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
