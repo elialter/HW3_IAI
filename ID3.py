@@ -5,6 +5,7 @@ import math
 
 IS_SICK = 0
 
+
 class TreeNode(object):
     def __init__(self) -> None:
         super().__init__()
@@ -13,7 +14,6 @@ class TreeNode(object):
         self.edge_value = None
         self.high_node = None
         self.low_node = None
-
 
 
 class ID3:
@@ -33,21 +33,20 @@ class ID3:
 
         correct_identification = 0
 
-        patient_list.sort()
-        test.sort()
+        patient_list.sort(key=lambda x: x[1])
+        test.sort(key=lambda x: x[0])
 
         for i in range(len(test)):
             node = root_node
             while node.high_node is not None or node.low_node is not None:
-                if test[i][node.property] >= node.edge_value:
+                if test[i][node.property - 1] >= node.edge_value:
                     node = node.high_node
                 else:
                     node = node.low_node
             if node.sickness == patient_list[i][IS_SICK]:
                 correct_identification += 1
-            print(node.sickness, patient_list[i][IS_SICK])
-
-        print(correct_identification)
+            if node.sickness != patient_list[i][IS_SICK]:
+                print(i, node.sickness, patient_list[i][IS_SICK])
 
         print("end")
 
@@ -63,7 +62,6 @@ class ID3:
         if len(remaining_properties) == 0:
             return -1  # TODO
 
-        curr_ig = 0
         best_ig = 0
         best_ig_edge = 0
         best_prop = remaining_properties[0]
@@ -79,7 +77,7 @@ class ID3:
                     nom_of_high_value_patients_sick -= 1
                     nom_of_low_value_patients_sick += 1
                     curr_ig = self.calc_information_gain(len(remaining_patients), i, nom_of_low_value_patients_sick,
-                                                              nom_of_high_value_patients_sick)
+                                                         nom_of_high_value_patients_sick)
                     if curr_ig >= best_ig:
                         best_ig = curr_ig
                         best_ig_edge = (remaining_patients[i][prop] + remaining_patients[i + 1][prop]) / 2
@@ -88,11 +86,10 @@ class ID3:
         high_patient = []
         low_patient = []
         for patient in remaining_patients:
-            if (patient[best_prop] < best_ig_edge):
+            if patient[best_prop] < best_ig_edge:
                 low_patient.append(patient)
             else:
                 high_patient.append(patient)
-
 
         low_properties = remaining_properties.copy()
         high_properties = remaining_properties.copy()
@@ -128,7 +125,7 @@ class ID3:
             return 0
 
         return -(probability_m * math.log(probability_m, 2) +
-                              probability_b * math.log(probability_b, 2))
+                 probability_b * math.log(probability_b, 2))
 
     def calc_information_gain(self, num_of_patients, i, num_sick_low, num_sick_high):
 
@@ -146,5 +143,5 @@ class ID3:
         child_low_entropy = self.calc_and_check_entropy(probability_m_low, probability_b_low)
         child_high_entropy = self.calc_and_check_entropy(probability_m_high, probability_b_high)
         information_gain = parent_entropy - (num_of_patients_low / num_of_patients) * child_low_entropy - \
-            (num_of_patients_high / num_of_patients) * child_high_entropy
+                           (num_of_patients_high / num_of_patients) * child_high_entropy
         return information_gain
