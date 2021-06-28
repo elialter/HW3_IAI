@@ -30,25 +30,25 @@ class ID3:
             properties.append(i)
 
         root_node = self.recursiv_identefier(patient_list, properties)
-
-        correct_identification = 0
-
-        patient_list.sort(key=lambda x: x[1])
-        test.sort(key=lambda x: x[0])
-
+        new_test = []
         for i in range(len(test)):
+            row = []
             node = root_node
             while node.high_node is not None or node.low_node is not None:
                 if test[i][node.property - 1] >= node.edge_value:
                     node = node.high_node
                 else:
                     node = node.low_node
-            if node.sickness == patient_list[i][IS_SICK]:
-                correct_identification += 1
-            if node.sickness != patient_list[i][IS_SICK]:
-                print(i, node.sickness, patient_list[i][IS_SICK])
+            if node.sickness == "M":
+                row.append(1)
+            else:
+                row.append(0)
+            for j in range(len(test[i])):
+                row.append(test[i][j])
+            new_test.append(row)
 
-        print("end")
+        array = numpy.array(new_test)
+        return array
 
     def recursiv_identefier(self, remaining_patients, remaining_properties):
         if self.check_if_homogeneous(remaining_patients):
