@@ -27,14 +27,17 @@ if __name__ == '__main__':
     data.sort(key=lambda x: x[3])
 
     test_array = []
-
     for i in range(len(array)):
         row = []
         for j in range(1, len(array[0])):
             row.append(data[i][j])
         test_array.append(row)
 
-    id3.fit_predict(array, test_array)
+    test_array = numpy.array(test_array)
+    result = id3.fit_predict(array, test_array)
+
+    id3.experiment(array)
+
 
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

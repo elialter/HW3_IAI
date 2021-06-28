@@ -2,6 +2,7 @@ import numpy
 import csv
 import pandas
 import math
+from sklearn.model_selection import KFold
 
 IS_SICK = 0
 
@@ -25,6 +26,13 @@ class ID3:
             for j in range(1, len(train[i])):
                 patient_list[i][j] = float(patient_list[i][j])
 
+        test_list = []
+        for i in range(len(test)):
+            test_list.append(test[i].tolist())
+            for j in range(1, len(test[i])):
+                test_list[i][j] = float(test_list[i][j])
+        test = test_list
+
         properties = []
         for i in range(1, len(patient_list[0])):
             properties.append(i)
@@ -32,7 +40,6 @@ class ID3:
         root_node = self.recursiv_identefier(patient_list, properties)
         new_test = []
         for i in range(len(test)):
-            row = []
             node = root_node
             while node.high_node is not None or node.low_node is not None:
                 if test[i][node.property - 1] >= node.edge_value:
@@ -40,12 +47,9 @@ class ID3:
                 else:
                     node = node.low_node
             if node.sickness == "M":
-                row.append(1)
+                new_test.append(1)
             else:
-                row.append(0)
-            for j in range(len(test[i])):
-                row.append(test[i][j])
-            new_test.append(row)
+                new_test.append(0)
 
         array = numpy.array(new_test)
         return array
@@ -145,3 +149,34 @@ class ID3:
         information_gain = parent_entropy - (num_of_patients_low / num_of_patients) * child_low_entropy - \
                            (num_of_patients_high / num_of_patients) * child_high_entropy
         return information_gain
+
+    def experiment(self, array):
+        sets = KFold(n_splits=5, shuffle=True, random_state=311153746)
+        for train_index, test_index in sets.split(array):
+            test_index_list = test_index.tolist()
+            training = []
+            testing = []
+            for i in range(len(array)):
+                if i in test_index_list:
+                    testing.append(array[i].tolist())
+                else:
+                    training.append(array[i].tolist())
+            for row in testing:
+                del row[0]
+            training = numpy.array(training)
+            testing = numpy.array(testing)
+            result = self.fit_predict(training, testing)
+            counter = 0
+            j = 0
+            for i in range(len(array)):
+                if i in testing:
+                    if (result[j] == 1 and array[i][IS_SICK] == 'M') or (result[j] == 0 and array[i][IS_SICK] == 'B'):
+                        counter += 1
+                    j += 1
+            print(counter)
+
+        print('End')
+
+
+
+
