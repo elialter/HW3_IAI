@@ -18,7 +18,7 @@ class TreeNode(object):
 
 
 class ID3:
-    def fit_predict(self, train, test):
+    def fit_predict(self, train, test, minimum_items_to_split=2):
 
         patient_list = []
         for i in range(len(train)):
@@ -37,7 +37,7 @@ class ID3:
         for i in range(1, len(patient_list[0])):
             properties.append(i)
 
-        root_node = self.recursiv_identefier(patient_list, properties)
+        root_node = self.recursive_identifier(patient_list, properties, minimum_items_to_split)
         new_test = []
         for i in range(len(test)):
             node = root_node
@@ -54,7 +54,8 @@ class ID3:
         array = numpy.array(new_test)
         return array
 
-    def recursiv_identefier(self, remaining_patients, remaining_properties):
+    def recursive_identifier(self, remaining_patients, remaining_properties, minimum_items_to_split):
+
         if self.check_if_homogeneous(remaining_patients):
             leaf = TreeNode()
             if remaining_patients[0][IS_SICK] == 'M':
@@ -63,10 +64,12 @@ class ID3:
                 leaf.sickness = 'B'
             return leaf
 
-        if len(remaining_properties) == 0:
-            return -1  # TODO
+        if len(remaining_patients) < minimum_items_to_split:
+            leaf = TreeNode()
+            leaf.sickness = self.sickness_majority(remaining_patients)
+            return leaf
 
-        best_ig = 0
+        best_ig = -1
         best_ig_edge = 0
         best_prop = remaining_properties[0]
         for prop in remaining_properties:
@@ -80,12 +83,12 @@ class ID3:
                 if remaining_patients[i][0] == "M":
                     nom_of_high_value_patients_sick -= 1
                     nom_of_low_value_patients_sick += 1
-                    curr_ig = self.calc_information_gain(len(remaining_patients), i, nom_of_low_value_patients_sick,
-                                                         nom_of_high_value_patients_sick)
-                    if curr_ig >= best_ig:
-                        best_ig = curr_ig
-                        best_ig_edge = (remaining_patients[i][prop] + remaining_patients[i + 1][prop]) / 2
-                        best_prop = prop
+                curr_ig = self.calc_information_gain(len(remaining_patients), i, nom_of_low_value_patients_sick,
+                                                     nom_of_high_value_patients_sick)
+                if curr_ig >= best_ig:
+                    best_ig = curr_ig
+                    best_ig_edge = (remaining_patients[i][prop] + remaining_patients[i + 1][prop]) / 2
+                    best_prop = prop
 
         high_patient = []
         low_patient = []
@@ -103,8 +106,8 @@ class ID3:
         new_node = TreeNode()
         new_node.property = best_prop
         new_node.edge_value = best_ig_edge
-        new_node.low_node = self.recursiv_identefier(low_patient, low_properties)
-        new_node.high_node = self.recursiv_identefier(high_patient, high_properties)
+        new_node.low_node = self.recursive_identifier(low_patient, low_properties, minimum_items_to_split)
+        new_node.high_node = self.recursive_identifier(high_patient, high_properties, minimum_items_to_split)
 
         return new_node
 
@@ -150,7 +153,7 @@ class ID3:
                            (num_of_patients_high / num_of_patients) * child_high_entropy
         return information_gain
 
-    def experiment(self, array):
+    def experiment(self, array, minimum_items_to_split):
         sets = KFold(n_splits=5, shuffle=True, random_state=311153746)
         for train_index, test_index in sets.split(array):
             test_index_list = test_index.tolist()
@@ -165,18 +168,29 @@ class ID3:
                 del row[0]
             training = numpy.array(training)
             testing = numpy.array(testing)
-            result = self.fit_predict(training, testing)
+            result = self.fit_predict(training, testing, minimum_items_to_split)
             counter = 0
             j = 0
             for i in range(len(array)):
-                if i in testing:
+                if i in test_index_list:
                     if (result[j] == 1 and array[i][IS_SICK] == 'M') or (result[j] == 0 and array[i][IS_SICK] == 'B'):
                         counter += 1
                     j += 1
             print(counter)
 
-        print('End')
-
+    @staticmethod
+    def sickness_majority(patients):
+        sick_patients = 0
+        healthy_patients = 0
+        for row in patients:
+            if row[IS_SICK] is 'M':
+                sick_patients += 1
+            else:
+                healthy_patients += 1
+        if sick_patients >= healthy_patients:
+            return 'M'
+        else:
+            return 'B'
 
 
 

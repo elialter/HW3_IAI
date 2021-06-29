@@ -36,7 +36,9 @@ if __name__ == '__main__':
     test_array = numpy.array(test_array)
     result = id3.fit_predict(array, test_array)
 
-    id3.experiment(array)
+    for minimum_items_to_split in range(2, 11, 2):  # low_limit = 2, 4, 6, 8, 10
+        print('For the low limit: ', minimum_items_to_split)
+        id3.experiment(array, minimum_items_to_split)
 
 
 
