@@ -18,6 +18,7 @@ class TreeNode(object):
 
 
 class ID3:
+
     def fit_predict(self, train, test, minimum_items_to_split=2):
 
         patient_list = []
@@ -176,7 +177,7 @@ class ID3:
                     if (result[j] == 1 and array[i][IS_SICK] == 'M') or (result[j] == 0 and array[i][IS_SICK] == 'B'):
                         counter += 1
                     j += 1
-            print(counter)
+            print(len(test_index_list) - counter)
 
     @staticmethod
     def sickness_majority(patients):
@@ -191,6 +192,3 @@ class ID3:
             return 'M'
         else:
             return 'B'
-
-
-
