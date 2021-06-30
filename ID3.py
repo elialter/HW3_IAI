@@ -70,6 +70,8 @@ class ID3:
             leaf.sickness = self.sickness_majority(remaining_patients)
             return leaf
 
+        if len(remaining_patients) == 26 and remaining_patients[0][1] == 13.43 and remaining_patients[25][1] == 14.22:
+            print('oi')
         best_ig = -1
         best_ig_edge = 0
         best_prop = remaining_properties[0]
@@ -84,12 +86,16 @@ class ID3:
                 if remaining_patients[i][0] == "M":
                     nom_of_high_value_patients_sick -= 1
                     nom_of_low_value_patients_sick += 1
-                curr_ig = self.calc_information_gain(len(remaining_patients), i, nom_of_low_value_patients_sick,
-                                                     nom_of_high_value_patients_sick)
-                if curr_ig >= best_ig:
-                    best_ig = curr_ig
-                    best_ig_edge = (remaining_patients[i][prop] + remaining_patients[i + 1][prop]) / 2
-                    best_prop = prop
+                # If the higher value equals to the lower value, then we don't want to separate them by this
+                # property, otherwise we won't be consistent.  We will pick a different way to separate them later on (
+                # choosing a different property).
+                if are_not_equal(remaining_patients[i][prop], remaining_patients[i + 1][prop]):
+                    curr_ig = self.calc_information_gain(len(remaining_patients), i, nom_of_low_value_patients_sick,
+                                                         nom_of_high_value_patients_sick)
+                    if curr_ig >= best_ig:
+                        best_ig = curr_ig
+                        best_ig_edge = (remaining_patients[i][prop] + remaining_patients[i + 1][prop]) / 2
+                        best_prop = prop
 
         high_patient = []
         low_patient = []
@@ -101,12 +107,14 @@ class ID3:
 
         low_properties = remaining_properties.copy()
         high_properties = remaining_properties.copy()
-        low_properties.remove(best_prop)
-        high_properties.remove(best_prop)
+#       low_properties.remove(best_prop)
+#       high_properties.remove(best_prop)
 
         new_node = TreeNode()
         new_node.property = best_prop
         new_node.edge_value = best_ig_edge
+        if len(low_patient) == 0 or len(high_patient) == 0:
+            print('Here!')
         new_node.low_node = self.recursive_identifier(low_patient, low_properties, minimum_items_to_split)
         new_node.high_node = self.recursive_identifier(high_patient, high_properties, minimum_items_to_split)
 
@@ -156,6 +164,7 @@ class ID3:
 
     def experiment(self, array, minimum_items_to_split):
         sets = KFold(n_splits=5, shuffle=True, random_state=311153746)
+        total_error = 0
         for train_index, test_index in sets.split(array):
             test_index_list = test_index.tolist()
             training = []
@@ -177,7 +186,9 @@ class ID3:
                     if (result[j] == 1 and array[i][IS_SICK] == 'M') or (result[j] == 0 and array[i][IS_SICK] == 'B'):
                         counter += 1
                     j += 1
-            print(len(test_index_list) - counter)
+            total_error += (len(test_index_list) - counter)/len(test_index_list)
+        error_average = total_error/5
+        print(error_average)
 
     @staticmethod
     def sickness_majority(patients):
@@ -192,3 +203,10 @@ class ID3:
             return 'M'
         else:
             return 'B'
+
+
+def are_not_equal(num_a, num_b):
+    if num_a - num_b < 0.00001 and num_b - num_a < 0.00001:
+        return False
+    else:
+        return True
