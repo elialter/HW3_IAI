@@ -3,6 +3,7 @@ from ID3 import *
 import numpy
 import csv
 import pandas
+from PersonalizedID3 import *
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
@@ -15,7 +16,7 @@ def print_hi(name):
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     print_hi('PyCharm')
-    id3 = ID3()
+    id3 = PersonalizedID3()
 
     with open('train.csv') as csvfile:
         data = list(csv.reader(csvfile))
@@ -36,7 +37,7 @@ if __name__ == '__main__':
     test_array = numpy.array(test_array)
     result = id3.fit_predict(array, test_array)
 
-    for minimum_items_to_split in range(2, 11, 2):
+    for minimum_items_to_split in range(2, 243):
         print('For the low limit: ', minimum_items_to_split)
         id3.experiment(array, minimum_items_to_split)
 

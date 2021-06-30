@@ -54,7 +54,7 @@ class PersonalizedID3:
         array = numpy.array(new_test)
         return array
 
-    def recursive_identifier(self, remaining_patients, remaining_properties, minimum_items_to_split):
+    def recursive_identifier(self, remaining_patients, properties, minimum_items_to_split):
 
         if self.check_if_homogeneous(remaining_patients):
             leaf = TreeNode()
@@ -71,8 +71,8 @@ class PersonalizedID3:
 
         best_ig = -1
         best_ig_edge = 0
-        best_prop = remaining_properties[0]
-        for prop in remaining_properties:
+        best_prop = properties[0]
+        for prop in properties:
 
             total_sick = self.calc_num_of_sick(remaining_patients)
             nom_of_high_value_patients_sick = total_sick
@@ -83,12 +83,16 @@ class PersonalizedID3:
                 if remaining_patients[i][0] == "M":
                     nom_of_high_value_patients_sick -= 1
                     nom_of_low_value_patients_sick += 1
-                curr_ig = self.calc_information_gain(len(remaining_patients), i, nom_of_low_value_patients_sick,
-                                                     nom_of_high_value_patients_sick)
-                if curr_ig >= best_ig:
-                    best_ig = curr_ig
-                    best_ig_edge = (remaining_patients[i][prop] + remaining_patients[i + 1][prop]) / 2
-                    best_prop = prop
+                # If the higher value equals to the lower value, then we don't want to separate them by this
+                # property, otherwise we won't be consistent.  We will pick a different way to separate them later on (
+                # choosing a different property).
+                if are_not_equal(remaining_patients[i][prop], remaining_patients[i + 1][prop]):
+                    curr_ig = self.calc_information_gain(len(remaining_patients), i, nom_of_low_value_patients_sick,
+                                                         nom_of_high_value_patients_sick)
+                    if curr_ig >= best_ig:
+                        best_ig = curr_ig
+                        best_ig_edge = (remaining_patients[i][prop] + remaining_patients[i + 1][prop]) / 2
+                        best_prop = prop
 
         high_patient = []
         low_patient = []
@@ -98,16 +102,11 @@ class PersonalizedID3:
             else:
                 high_patient.append(patient)
 
-        low_properties = remaining_properties.copy()
-        high_properties = remaining_properties.copy()
-        low_properties.remove(best_prop)
-        high_properties.remove(best_prop)
-
         new_node = TreeNode()
         new_node.property = best_prop
         new_node.edge_value = best_ig_edge
-        new_node.low_node = self.recursive_identifier(low_patient, low_properties, minimum_items_to_split)
-        new_node.high_node = self.recursive_identifier(high_patient, high_properties, minimum_items_to_split)
+        new_node.low_node = self.recursive_identifier(low_patient, properties, minimum_items_to_split)
+        new_node.high_node = self.recursive_identifier(high_patient, properties, minimum_items_to_split)
 
         return new_node
 
@@ -186,7 +185,7 @@ class PersonalizedID3:
                     j += 1
             loss += (fp + 8*fn)
 #            print("loss is: " + str((fp + 8*fn)))
-        return str(loss/5) +" "+str()
+        print( str(loss/5) +" "+str())
 
     @staticmethod
     def sickness_majority(patients):
@@ -197,10 +196,14 @@ class PersonalizedID3:
                 sick_patients += 1
             else:
                 healthy_patients += 1
-        if sick_patients >= healthy_patients * (1/7):
+        if sick_patients >= healthy_patients * (1/8):
             return 'M'
         else:
             return 'B'
 
 
-
+def are_not_equal(num_a, num_b):
+    if num_a - num_b < 0.00001 and num_b - num_a < 0.00001:
+        return False
+    else:
+        return True

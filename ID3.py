@@ -70,7 +70,7 @@ class ID3:
             leaf.sickness = self.sickness_majority(remaining_patients)
             return leaf
 
-        best_ig = -1
+        best_ig = -2
         best_ig_edge = 0
         best_prop = properties[0]
         for prop in properties:
@@ -94,6 +94,10 @@ class ID3:
                         best_ig = curr_ig
                         best_ig_edge = (remaining_patients[i][prop] + remaining_patients[i + 1][prop]) / 2
                         best_prop = prop
+        if best_ig <= -1.8:
+            leaf = TreeNode()
+            leaf.sickness = self.sickness_majority(remaining_patients)
+            return leaf
 
         high_patient = []
         low_patient = []
