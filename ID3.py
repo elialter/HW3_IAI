@@ -55,7 +55,7 @@ class ID3:
         array = numpy.array(new_test)
         return array
 
-    def recursive_identifier(self, remaining_patients, remaining_properties, minimum_items_to_split):
+    def recursive_identifier(self, remaining_patients, properties, minimum_items_to_split):
 
         if self.check_if_homogeneous(remaining_patients):
             leaf = TreeNode()
@@ -70,12 +70,10 @@ class ID3:
             leaf.sickness = self.sickness_majority(remaining_patients)
             return leaf
 
-        if len(remaining_patients) == 26 and remaining_patients[0][1] == 13.43 and remaining_patients[25][1] == 14.22:
-            print('oi')
         best_ig = -1
         best_ig_edge = 0
-        best_prop = remaining_properties[0]
-        for prop in remaining_properties:
+        best_prop = properties[0]
+        for prop in properties:
 
             total_sick = self.calc_num_of_sick(remaining_patients)
             nom_of_high_value_patients_sick = total_sick
@@ -105,18 +103,11 @@ class ID3:
             else:
                 high_patient.append(patient)
 
-        low_properties = remaining_properties.copy()
-        high_properties = remaining_properties.copy()
-#       low_properties.remove(best_prop)
-#       high_properties.remove(best_prop)
-
         new_node = TreeNode()
         new_node.property = best_prop
         new_node.edge_value = best_ig_edge
-        if len(low_patient) == 0 or len(high_patient) == 0:
-            print('Here!')
-        new_node.low_node = self.recursive_identifier(low_patient, low_properties, minimum_items_to_split)
-        new_node.high_node = self.recursive_identifier(high_patient, high_properties, minimum_items_to_split)
+        new_node.low_node = self.recursive_identifier(low_patient, properties, minimum_items_to_split)
+        new_node.high_node = self.recursive_identifier(high_patient, properties, minimum_items_to_split)
 
         return new_node
 
