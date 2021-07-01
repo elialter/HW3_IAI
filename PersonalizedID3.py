@@ -153,7 +153,7 @@ class PersonalizedID3:
         return information_gain
 
     def experiment(self, array, minimum_items_to_split):
-        sets = KFold(n_splits=5, shuffle=True, random_state=311153746)
+        sets = KFold(n_splits=5, shuffle=True, random_state=311153746)#311153746
         loss = 0
         for train_index, test_index in sets.split(array):
             test_index_list = test_index.tolist()
@@ -196,7 +196,7 @@ class PersonalizedID3:
                 sick_patients += 1
             else:
                 healthy_patients += 1
-        if sick_patients >= healthy_patients * (1/8):
+        if sick_patients * 4 >= healthy_patients:
             return 'M'
         else:
             return 'B'

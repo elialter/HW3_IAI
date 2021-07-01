@@ -158,8 +158,9 @@ class ID3:
         return information_gain
 
     def experiment(self, array, minimum_items_to_split):
-        sets = KFold(n_splits=5, shuffle=True, random_state=311153746)
+        sets = KFold(n_splits=5, shuffle=True, random_state=203662812)
         total_error = 0
+        loss = 0
         for train_index, test_index in sets.split(array):
             test_index_list = test_index.tolist()
             training = []
@@ -176,14 +177,21 @@ class ID3:
             result = self.fit_predict(training, testing, minimum_items_to_split)
             counter = 0
             j = 0
+            fp = 0
+            fn = 0
             for i in range(len(array)):
                 if i in test_index_list:
                     if (result[j] == 1 and array[i][IS_SICK] == 'M') or (result[j] == 0 and array[i][IS_SICK] == 'B'):
                         counter += 1
+                    else:
+                        if result[j] == 0 and array[i][IS_SICK] == 'M':
+                            fn += 1
+                        else:
+                            fp += 1
                     j += 1
-            total_error += (len(test_index_list) - counter)/len(test_index_list)
-        error_average = total_error/5
-        print(error_average)
+            loss += (fp + 8 * fn)
+            #            print("loss is: " + str((fp + 8*fn)))
+        print(str(loss / 5) + " " + str())
 
     @staticmethod
     def sickness_majority(patients):
