@@ -1,6 +1,7 @@
 import numpy
 import csv
 import pandas
+import matplotlib.pyplot as plt
 import math
 from sklearn.model_selection import KFold
 
@@ -157,41 +158,38 @@ class ID3:
                            (num_of_patients_high / num_of_patients) * child_high_entropy
         return information_gain
 
-    def experiment(self, array, minimum_items_to_split):
-        sets = KFold(n_splits=5, shuffle=True, random_state=203662812)
-        total_error = 0
-        loss = 0
-        for train_index, test_index in sets.split(array):
-            test_index_list = test_index.tolist()
-            training = []
-            testing = []
-            for i in range(len(array)):
-                if i in test_index_list:
-                    testing.append(array[i].tolist())
-                else:
-                    training.append(array[i].tolist())
-            for row in testing:
-                del row[0]
-            training = numpy.array(training)
-            testing = numpy.array(testing)
-            result = self.fit_predict(training, testing, minimum_items_to_split)
-            counter = 0
-            j = 0
-            fp = 0
-            fn = 0
-            for i in range(len(array)):
-                if i in test_index_list:
-                    if (result[j] == 1 and array[i][IS_SICK] == 'M') or (result[j] == 0 and array[i][IS_SICK] == 'B'):
-                        counter += 1
+    def experiment(self, array):
+        list_averages = []
+        for minimum_items_to_split in range(2, 11, 2):
+            sets = KFold(n_splits=5, shuffle=True, random_state=311153746)
+            total_error = 0
+            for train_index, test_index in sets.split(array):
+                test_index_list = test_index.tolist()
+                training = []
+                testing = []
+                for i in range(len(array)):
+                    if i in test_index_list:
+                        testing.append(array[i].tolist())
                     else:
-                        if result[j] == 0 and array[i][IS_SICK] == 'M':
-                            fn += 1
-                        else:
-                            fp += 1
-                    j += 1
-            loss += (fp + 8 * fn)
-            #            print("loss is: " + str((fp + 8*fn)))
-        print(str(loss / 5) + " " + str())
+                        training.append(array[i].tolist())
+                for row in testing:
+                    del row[0]
+                training = numpy.array(training)
+                testing = numpy.array(testing)
+                result = self.fit_predict(training, testing, minimum_items_to_split)
+                counter = 0
+                j = 0
+                for i in range(len(array)):
+                    if i in test_index_list:
+                        if (result[j] == 1 and array[i][IS_SICK] == 'M') or (result[j] == 0 and array[i][IS_SICK] == 'B'):
+                            counter += 1
+                        j += 1
+                total_error += (len(test_index_list) - counter) / len(test_index_list)
+            list_averages.append(total_error/5)
+        # Plotting: remove # from next line for plotting
+        #show_graph(list_averages, range(2, 11, 2))
+        # note! : lists' length must be the same
+
 
     @staticmethod
     def sickness_majority(patients):
@@ -213,3 +211,12 @@ def are_not_equal(num_a, num_b):
         return False
     else:
         return True
+
+
+def show_graph(list_averages, range_list):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(range_list, list_averages, color='blue', linewidth=3)
+    ax.set_xlim(1, 11)
+    plt.show(block=True)
+

@@ -69,7 +69,7 @@ class PersonalizedID3:
             leaf.sickness = self.sickness_majority(remaining_patients)
             return leaf
 
-        best_ig = -1
+        best_ig = -2
         best_ig_edge = 0
         best_prop = properties[0]
         for prop in properties:
@@ -93,6 +93,10 @@ class PersonalizedID3:
                         best_ig = curr_ig
                         best_ig_edge = (remaining_patients[i][prop] + remaining_patients[i + 1][prop]) / 2
                         best_prop = prop
+        if best_ig <= -1.8:
+            leaf = TreeNode()
+            leaf.sickness = self.sickness_majority(remaining_patients)
+            return leaf
 
         high_patient = []
         low_patient = []
@@ -153,7 +157,8 @@ class PersonalizedID3:
         return information_gain
 
     def experiment(self, array, minimum_items_to_split):
-        sets = KFold(n_splits=5, shuffle=True, random_state=311153746)#311153746
+        n_split = 5
+        sets = KFold(n_splits=n_split, shuffle=True, random_state=311153746)
         loss = 0
         for train_index, test_index in sets.split(array):
             test_index_list = test_index.tolist()
@@ -184,8 +189,7 @@ class PersonalizedID3:
                             fp += 1
                     j += 1
             loss += (fp + 8*fn)
-#            print("loss is: " + str((fp + 8*fn)))
-        print( str(loss/5) +" "+str())
+        return str(loss/n_split) +" "+str()
 
     @staticmethod
     def sickness_majority(patients):
@@ -196,7 +200,7 @@ class PersonalizedID3:
                 sick_patients += 1
             else:
                 healthy_patients += 1
-        if sick_patients * 4 >= healthy_patients:
+        if sick_patients * 8 >= healthy_patients:
             return 'M'
         else:
             return 'B'
